@@ -4,32 +4,464 @@
         Title="PromptGacha · 提示词抽卡器" Height="760" Width="1180"
         MinHeight="560" MinWidth="920"
         WindowStartupLocation="CenterScreen"
-        FontSize="13">
+        FontSize="13"
+        FontFamily="Microsoft YaHei UI, Segoe UI"
+        Background="#F3F6FB"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display">
     <Window.Resources>
-        <!-- 参数行统一高度，避免下拉框被行高压扁 -->
-        <Style TargetType="ComboBox">
-            <Setter Property="Height" Value="26" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0,2" />
+
+        <!-- ==================== 调色板 ==================== -->
+        <SolidColorBrush x:Key="Ink" Color="#232A3B" />
+        <SolidColorBrush x:Key="InkSoft" Color="#4A5468" />
+        <SolidColorBrush x:Key="Muted" Color="#7C8798" />
+        <SolidColorBrush x:Key="Line" Color="#E3E8F1" />
+        <SolidColorBrush x:Key="LineSoft" Color="#EFF2F8" />
+        <SolidColorBrush x:Key="Card" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="CardHead" Color="#F8FAFE" />
+        <SolidColorBrush x:Key="InputBg" Color="#FBFCFE" />
+        <SolidColorBrush x:Key="Accent" Color="#4F6BED" />
+        <SolidColorBrush x:Key="AccentDeep" Color="#3F58D8" />
+        <SolidColorBrush x:Key="AccentSoft" Color="#EEF1FF" />
+        <LinearGradientBrush x:Key="AccentGrad" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#6A7DF7" Offset="0" />
+            <GradientStop Color="#4F5FE0" Offset="1" />
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="WindowBg" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#F2F5FB" Offset="0" />
+            <GradientStop Color="#E8EEF8" Offset="1" />
+        </LinearGradientBrush>
+
+        <!-- ==================== 文本 ==================== -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         </Style>
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+
+        <!-- ==================== 按钮 ==================== -->
+        <Style x:Key="BaseButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="Background" Value="{StaticResource Card}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Line}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bd" CornerRadius="8"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <Border x:Name="Hover" CornerRadius="8" Background="#00000000" />
+                                <ContentPresenter Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True" />
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Hover" Property="Background" Value="#14000000" />
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Hover" Property="Background" Value="#26000000" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.42" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="{StaticResource AccentGrad}" />
+            <Setter Property="BorderBrush" Value="#00000000" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <!-- 隐式按钮样式：右上角「复制 / 保存…」等 -->
+        <Style TargetType="Button" BasedOn="{StaticResource BaseButton}" />
+
+        <!-- ==================== 输入框 ==================== -->
         <Style TargetType="TextBox">
-            <Setter Property="Height" Value="26" />
+            <Setter Property="Height" Value="27" />
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="Margin" Value="0,2" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="Background" Value="{StaticResource InputBg}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Line}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CaretBrush" Value="{StaticResource Accent}" />
+            <Setter Property="SelectionBrush" Value="{StaticResource Accent}" />
+            <Setter Property="SelectionOpacity" Value="0.28" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Bd" CornerRadius="6"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Focusable="False"
+                                          HorizontalScrollBarVisibility="Hidden"
+                                          VerticalScrollBarVisibility="Hidden" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="#C3CDE4" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}" />
+                                <Setter TargetName="Bd" Property="Background" Value="White" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 多行只读区（日志 / 提示词） -->
+        <Style x:Key="ConsoleBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Height" Value="Auto" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Padding" Value="10,8" />
+            <Setter Property="Background" Value="{StaticResource Card}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+        <!-- ==================== 滚动条（细胶囊） ==================== -->
+        <SolidColorBrush x:Key="SbThumb" Color="#CBD4E4" />
+        <SolidColorBrush x:Key="SbThumbHover" Color="#AAB6CC" />
+        <SolidColorBrush x:Key="SbThumbDrag" Color="#8B99B6" />
+
+        <Style x:Key="ScrollThumbStyle" TargetType="Thumb">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Thumb">
+                        <Border x:Name="T" CornerRadius="3.5" Margin="2" Background="{StaticResource SbThumb}" />
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="T" Property="Background" Value="{StaticResource SbThumbHover}" />
+                            </Trigger>
+                            <Trigger Property="IsDragging" Value="True">
+                                <Setter TargetName="T" Property="Background" Value="{StaticResource SbThumbDrag}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ScrollPageButton" TargetType="RepeatButton">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RepeatButton">
+                        <Border Background="Transparent" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <ControlTemplate x:Key="ScrollBarVertical" TargetType="ScrollBar">
+            <Grid Background="Transparent">
+                <Track x:Name="PART_Track" Orientation="Vertical" IsDirectionReversed="True"
+                       Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                       Value="{TemplateBinding Value}" ViewportSize="{TemplateBinding ViewportSize}">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageUpCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollThumbStyle}" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageDownCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="ScrollBarHorizontal" TargetType="ScrollBar">
+            <Grid Background="Transparent">
+                <Track x:Name="PART_Track" Orientation="Horizontal" IsDirectionReversed="False"
+                       Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                       Value="{TemplateBinding Value}" ViewportSize="{TemplateBinding ViewportSize}">
+                    <Track.DecreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageLeftCommand" />
+                    </Track.DecreaseRepeatButton>
+                    <Track.Thumb>
+                        <Thumb Style="{StaticResource ScrollThumbStyle}" />
+                    </Track.Thumb>
+                    <Track.IncreaseRepeatButton>
+                        <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageRightCommand" />
+                    </Track.IncreaseRepeatButton>
+                </Track>
+            </Grid>
+        </ControlTemplate>
+
+        <Style TargetType="ScrollBar">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Width" Value="11" />
+            <Setter Property="MinWidth" Value="11" />
+            <Setter Property="Template" Value="{StaticResource ScrollBarVertical}" />
+            <Style.Triggers>
+                <Trigger Property="Orientation" Value="Horizontal">
+                    <Setter Property="Template" Value="{StaticResource ScrollBarHorizontal}" />
+                    <Setter Property="Width" Value="Auto" />
+                    <Setter Property="MinWidth" Value="0" />
+                    <Setter Property="Height" Value="11" />
+                    <Setter Property="MinHeight" Value="11" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ==================== 下拉框 ==================== -->
+        <Style TargetType="ComboBox">
+            <Setter Property="Height" Value="27" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0,2" />
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Line}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="MaxDropDownHeight" Value="260" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" Focusable="False" ClickMode="Press"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="Chrome" CornerRadius="6" Background="{StaticResource InputBg}"
+                                                BorderBrush="{StaticResource Line}" BorderThickness="1">
+                                            <Path x:Name="Arrow" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                  Margin="0,0,10,0" Data="M0,0 L7,0 L3.5,4.5 Z" Fill="#9AA4B8" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Chrome" Property="BorderBrush" Value="#C3CDE4" />
+                                                <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource Accent}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="Chrome" Property="BorderBrush" Value="{StaticResource Accent}" />
+                                                <Setter TargetName="Chrome" Property="Background" Value="White" />
+                                                <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource Accent}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+
+                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="10,0,26,0"
+                                              HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+                            <Popup x:Name="PART_Popup" Placement="Bottom" AllowsTransparency="True"
+                                   Focusable="False" PopupAnimation="Fade" StaysOpen="False"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}">
+                                <Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1"
+                                        CornerRadius="8" Margin="0,4,0,0" Padding="0,4"
+                                        MinWidth="{Binding ActualWidth, ElementName=ToggleButton}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="14" ShadowDepth="3" Direction="270"
+                                                          Opacity="0.14" Color="#1B2440" />
+                                    </Border.Effect>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsPresenter />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.55" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource Ink}" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Bd" CornerRadius="6" Margin="5,1" Background="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentSoft}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#DFE5FF" />
+                                <Setter Property="Foreground" Value="{StaticResource AccentDeep}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ==================== 勾选框 ==================== -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource InkSoft}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <StackPanel Orientation="Horizontal" Background="Transparent">
+                            <Border x:Name="Box" Width="15" Height="15" CornerRadius="4"
+                                    BorderBrush="#C4CBD9" BorderThickness="1.4" Background="White"
+                                    VerticalAlignment="Center">
+                                <Path x:Name="Tick" Data="M0,3.4 L2.9,6.3 L7.8,1"
+                                      Stroke="White" StrokeThickness="1.8"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter Margin="7,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Box" Property="Background" Value="{StaticResource AccentGrad}" />
+                                <Setter TargetName="Box" Property="BorderBrush" Value="#00000000" />
+                                <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ==================== 卡片化 GroupBox ==================== -->
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="0,0,0,10" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GroupBox">
+                        <Border Background="{StaticResource Card}" CornerRadius="10"
+                                BorderBrush="{StaticResource Line}" BorderThickness="1">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="12" ShadowDepth="2" Direction="270"
+                                                  Opacity="0.05" Color="#0E1A38" />
+                            </Border.Effect>
+                            <DockPanel LastChildFill="True">
+                                <Border DockPanel.Dock="Top" Background="{StaticResource CardHead}"
+                                        BorderBrush="{StaticResource LineSoft}" BorderThickness="0,0,0,1"
+                                        CornerRadius="10,10,0,0" Padding="11,7">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="3" Height="12" CornerRadius="2"
+                                                Background="{StaticResource AccentGrad}" Margin="0,0,8,0"
+                                                VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Header, RelativeSource={RelativeSource TemplatedParent}}"
+                                                   FontWeight="SemiBold" FontSize="12.5"
+                                                   Foreground="{StaticResource Ink}" VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                                <ContentPresenter Margin="{TemplateBinding Padding}" />
+                            </DockPanel>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SplitLine" TargetType="GridSplitter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="Transparent">
+                            <Border Width="1" Background="{StaticResource Line}" HorizontalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="8">
+    <Grid Background="{StaticResource WindowBg}">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0">
+        <!-- ============ 顶栏 ============ -->
+        <Border Grid.Row="0" Padding="12,12,12,10">
+            <DockPanel LastChildFill="False">
+                <Border DockPanel.Dock="Left" Width="26" Height="26" CornerRadius="8"
+                        Background="{StaticResource AccentGrad}" VerticalAlignment="Center">
+                    <TextBlock Text="PG" Foreground="White" FontSize="11" FontWeight="Bold"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                    <TextBlock Text="PromptGacha" FontSize="15.5" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Text="提示词抽卡器" Foreground="{StaticResource Muted}" FontSize="12"
+                               VerticalAlignment="Center" Margin="8,2,0,0" />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Right" Text="girl / roll 引擎" FontSize="11.5"
+                           Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="12,0,12,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="440" MinWidth="360" />
-                <ColumnDefinition Width="6" />
+                <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="*" MinWidth="320" />
             </Grid.ColumnDefinitions>
 
@@ -42,20 +474,17 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <GroupBox Grid.Row="0" Header="通用" Padding="6">
+                <GroupBox Grid.Row="0" Header="通用" Padding="12,11,12,12">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="74" />
+                            <ColumnDefinition Width="42" />
                             <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="52" />
+                            <ColumnDefinition Width="46" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="等级" VerticalAlignment="Center" />
-                        <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CmbLevel" SelectedIndex="1">
+                        <TextBlock Grid.Column="0" Text="等级" Style="{StaticResource FieldLabel}" />
+                        <ComboBox Grid.Column="1" x:Name="CmbLevel" SelectedIndex="1">
                             <ComboBoxItem Content="sfw" />
                             <ComboBoxItem Content="suggestive" />
                             <ComboBoxItem Content="explicit" />
@@ -64,18 +493,18 @@
                             <ComboBoxItem Content="any" />
                         </ComboBox>
 
-                        <TextBlock Grid.Row="0" Grid.Column="2" Text="连抽" VerticalAlignment="Center" Margin="8,0,0,0" />
-                        <TextBox Grid.Row="0" Grid.Column="3" x:Name="TxtRepeat" Text="1" />
+                        <TextBlock Grid.Column="2" Text="连抽" Style="{StaticResource FieldLabel}" Margin="10,0,6,0" />
+                        <TextBox Grid.Column="3" x:Name="TxtRepeat" Text="1" />
                     </Grid>
                 </GroupBox>
 
-                <GroupBox Grid.Row="1" Header="girl —— 女性特征" Padding="6" Margin="0,8,0,0">
+                <GroupBox Grid.Row="1" Header="girl —— 女性特征" Padding="12,11,12,12">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="74" />
+                                <ColumnDefinition Width="42" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="52" />
+                                <ColumnDefinition Width="46" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
@@ -83,15 +512,14 @@
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="池" VerticalAlignment="Center" />
-                            <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" x:Name="CmbPool"
-                                      SelectedIndex="0">
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="池" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" x:Name="CmbPool" SelectedIndex="0">
                                 <ComboBoxItem Content="热门 TOP200" />
                                 <ComboBoxItem Content="热门 TOP1000" />
                                 <ComboBoxItem Content="全部女性" />
                             </ComboBox>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="关系" VerticalAlignment="Center" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="关系" Style="{StaticResource FieldLabel}" Margin="0,4,6,0" />
                             <ComboBox Grid.Row="1" Grid.Column="1" x:Name="CmbRelation" SelectedIndex="0">
                                 <ComboBoxItem Content="auto（按等级）" Tag="auto" />
                                 <ComboBoxItem Content="normal（正常互动）" Tag="normal" />
@@ -99,8 +527,7 @@
                                 <ComboBoxItem Content="none（不加）" Tag="none" />
                             </ComboBox>
 
-                            <TextBlock Grid.Row="1" Grid.Column="2" Text="人数" VerticalAlignment="Center"
-                                       Margin="8,0,0,0" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="人数" Style="{StaticResource FieldLabel}" Margin="10,4,6,0" />
                             <ComboBox Grid.Row="1" Grid.Column="3" x:Name="CmbCount" SelectedIndex="0">
                                 <ComboBoxItem Content="1" />
                                 <ComboBoxItem Content="2" />
@@ -108,34 +535,37 @@
                             </ComboBox>
                         </Grid>
 
-                        <WrapPanel Margin="0,8,0,0">
-                            <CheckBox x:Name="ChkHuge" Content="强制巨乳" Margin="0,0,14,4" />
-                            <CheckBox x:Name="ChkNoAvoid" Content="关闭避重" Margin="0,0,14,4" />
+                        <Border Height="1" Background="{StaticResource LineSoft}" Margin="0,10,0,9" />
+
+                        <WrapPanel>
+                            <CheckBox x:Name="ChkHuge" Content="强制巨乳" Margin="0,0,16,2" />
+                            <CheckBox x:Name="ChkNoAvoid" Content="关闭避重" Margin="0,0,16,2" />
                         </WrapPanel>
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="2" Header="roll —— 服装 / 姿势 / 表情 / 场景" Padding="6" Margin="0,8,0,0">
+                <GroupBox Grid.Row="2" Header="roll —— 服装 / 姿势 / 表情 / 场景" Padding="12,11,12,9">
                     <WrapPanel>
-                        <CheckBox x:Name="ChkNoOutfit" Content="不抽服装" Margin="0,0,14,4" />
-                        <CheckBox x:Name="ChkNoPose" Content="不抽姿势" Margin="0,0,14,4" />
-                        <CheckBox x:Name="ChkNoExpr" Content="不抽表情" Margin="0,0,14,4" />
-                        <CheckBox x:Name="ChkNoScene" Content="不抽场景" Margin="0,0,14,4" />
-                        <CheckBox x:Name="ChkAllowPublic" Content="允许公共场合暴露" Margin="0,0,14,4" />
+                        <CheckBox x:Name="ChkNoOutfit" Content="不抽服装" Margin="0,0,16,4" />
+                        <CheckBox x:Name="ChkNoPose" Content="不抽姿势" Margin="0,0,16,4" />
+                        <CheckBox x:Name="ChkNoExpr" Content="不抽表情" Margin="0,0,16,4" />
+                        <CheckBox x:Name="ChkNoScene" Content="不抽场景" Margin="0,0,16,4" />
+                        <CheckBox x:Name="ChkAllowPublic" Content="允许公共场合暴露" Margin="0,0,16,4" />
                     </WrapPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="3" Header="日志" Padding="6" Margin="0,8,0,0">
+                <GroupBox Grid.Row="3" Header="日志" Padding="0" Margin="0">
                     <TextBox x:Name="TxtLog" IsReadOnly="True" AcceptsReturn="True"
-                             Height="Auto" VerticalAlignment="Stretch" Margin="0"
+                             Style="{StaticResource ConsoleBox}"
                              TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
                              HorizontalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                             Foreground="{StaticResource InkSoft}" Background="#FBFCFE"
                              FontFamily="Consolas, Microsoft YaHei" FontSize="12" />
                 </GroupBox>
             </Grid>
 
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch"
-                          Background="#DDD" ResizeBehavior="PreviousAndNext" />
+            <GridSplitter Grid.Column="1" Style="{StaticResource SplitLine}"
+                          ResizeBehavior="PreviousAndNext" />
 
             <!-- ============ 右：提示词 ============ -->
             <Grid Grid.Column="2">
@@ -144,43 +574,92 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <DockPanel Grid.Row="0" LastChildFill="False" Margin="2,0,0,4">
-                    <TextBlock DockPanel.Dock="Left" Text="提示词" FontWeight="SemiBold" VerticalAlignment="Center" />
-                    <TextBlock DockPanel.Dock="Left" x:Name="TxtMeta" Margin="8,0,0,0" VerticalAlignment="Center"
-                               Foreground="#666" FontSize="12" />
-                    <Button DockPanel.Dock="Right" x:Name="BtnCopy" Content="复制" Padding="12,2" Height="24" Click="OnCopy" />
-                    <Button DockPanel.Dock="Right" x:Name="BtnSave" Content="保存…" Padding="12,2" Height="24"
-                            Margin="0,0,6,0" Click="OnSave" />
+                <DockPanel Grid.Row="0" LastChildFill="False" Margin="2,0,2,8">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="提示词" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" />
+                        <Border Background="{StaticResource AccentSoft}" CornerRadius="9" Padding="7,1.5"
+                                Margin="8,0,0,0" VerticalAlignment="Center">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=TxtMeta}" Value="">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock x:Name="TxtMeta" FontSize="11.5" Foreground="{StaticResource AccentDeep}" />
+                        </Border>
+                    </StackPanel>
+                    <Button DockPanel.Dock="Right" x:Name="BtnCopy" Content="复制" Padding="14,3" Height="26" Click="OnCopy" />
+                    <Button DockPanel.Dock="Right" x:Name="BtnSave" Content="保存…" Padding="14,3" Height="26"
+                            Margin="0,0,8,0" Click="OnSave" />
                 </DockPanel>
 
-                <TextBox Grid.Row="1" x:Name="TxtResult" IsReadOnly="True" AcceptsReturn="True"
-                         Height="Auto" VerticalAlignment="Stretch" Margin="0"
-                         TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
-                         FontFamily="Consolas, Microsoft YaHei" FontSize="13"
-                         Background="#FCFCFC" />
+                <Border Grid.Row="1" Background="{StaticResource Card}" CornerRadius="10"
+                        BorderBrush="{StaticResource Line}" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Direction="270"
+                                          Opacity="0.05" Color="#0E1A38" />
+                    </Border.Effect>
+                    <Grid>
+                        <TextBox x:Name="TxtResult" IsReadOnly="True" AcceptsReturn="True"
+                                 Style="{StaticResource ConsoleBox}"
+                                 TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                 VerticalContentAlignment="Top" Padding="14,12"
+                                 FontFamily="Consolas, Microsoft YaHei" FontSize="13"
+                                 Foreground="{StaticResource Ink}" />
+                        <TextBlock IsHitTestVisible="False" Margin="16,15,16,0" VerticalAlignment="Top"
+                                   TextWrapping="Wrap" FontSize="12.5" Foreground="#AEB7C6"
+                                   Text="抽 girl / 抽 roll 之后，提示词会显示在这里">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=TxtResult}" Value="">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </Border>
             </Grid>
         </Grid>
 
         <!-- ============ 底栏 ============ -->
-        <Grid Grid.Row="1" Margin="0,8,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" x:Name="BtnGirl" Content="抽 girl" Padding="18,6"
-                    FontWeight="SemiBold" Click="OnGirl" ToolTip="只抽女性特征" />
-            <Button Grid.Column="1" x:Name="BtnGirlRoll" Content="抽 girl + roll" Padding="18,6"
-                    FontWeight="SemiBold" Margin="8,0,0,0" Click="OnGirlRoll"
-                    ToolTip="先抽特征，再在这套特征上抽服装 / 姿势 / 表情 / 场景" />
-            <Button Grid.Column="2" x:Name="BtnRoll" Content="抽 roll" Padding="18,6"
-                    FontWeight="SemiBold" Margin="8,0,0,0" Click="OnRoll" ToolTip="在当前提示词为空时从头抽一套搭配" />
-            <Button Grid.Column="3" x:Name="BtnCancel" Content="取消" Padding="14,6"
-                    Margin="8,0,0,0" IsEnabled="False" Click="OnCancel" />
-            <TextBlock Grid.Column="4" x:Name="TxtStatus" VerticalAlignment="Center"
-                       Margin="12,0,0,0" Foreground="#444" TextTrimming="CharacterEllipsis" />
-        </Grid>
+        <Border Grid.Row="2" Margin="12,12,12,12" Padding="12" Background="{StaticResource Card}"
+                CornerRadius="12" BorderBrush="{StaticResource Line}" BorderThickness="1">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="16" ShadowDepth="3" Direction="270"
+                                  Opacity="0.07" Color="#0E1A38" />
+            </Border.Effect>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" x:Name="BtnGirl" Content="抽 girl" Padding="20,7"
+                        MinWidth="104" Click="OnGirl" ToolTip="只抽女性特征" />
+                <Button Grid.Column="1" x:Name="BtnGirlRoll" Content="抽 girl + roll" Padding="20,7"
+                        MinWidth="132" Margin="8,0,0,0" Click="OnGirlRoll"
+                        Style="{StaticResource PrimaryButton}"
+                        ToolTip="先抽特征，再在这套特征上抽服装 / 姿势 / 表情 / 场景" />
+                <Button Grid.Column="2" x:Name="BtnRoll" Content="抽 roll" Padding="20,7"
+                        MinWidth="104" Margin="8,0,0,0" Click="OnRoll" ToolTip="在当前提示词为空时从头抽一套搭配" />
+                <Button Grid.Column="3" x:Name="BtnCancel" Content="取消" Padding="16,7"
+                        MinWidth="76" Margin="8,0,0,0" IsEnabled="False" Click="OnCancel" />
+
+                <TextBlock Grid.Column="4" x:Name="TxtStatus" VerticalAlignment="Center"
+                           Margin="16,0,4,0" Foreground="{StaticResource Muted}" FontSize="12"
+                           TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </Border>
     </Grid>
 </Window>
