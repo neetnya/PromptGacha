@@ -31,6 +31,8 @@ namespace PromptGacha
         public string Level = "suggestive";
         public int Repeat = 1;
 
+        public AnimaOptions Clone() { return (AnimaOptions)MemberwiseClone(); }
+
         /// <summary>拼出子命令之后的参数列表（不含 python / 脚本路径）。</summary>
         public List<string> ToArgs(string cmd, string claimIn, string claimOut)
         {
@@ -89,7 +91,7 @@ namespace PromptGacha
                 var sb = new StringBuilder();
                 foreach (var it in Items)
                 {
-                    if (sb.Length > 0) sb.AppendLine();
+                    if (sb.Length > 0) sb.AppendLine().AppendLine();   // 多条之间空一行，一眼分得开
                     sb.Append(it.Text);
                 }
                 return sb.ToString();
@@ -101,10 +103,13 @@ namespace PromptGacha
             get
             {
                 var sb = new StringBuilder();
+                int idx = 0;
                 foreach (var it in Items)
                 {
-                    if (sb.Length > 0) sb.AppendLine().AppendLine(new string('=', 60)).AppendLine();
-                    sb.AppendLine(LogText.Clean(it.Report));
+                    idx++;
+                    if (sb.Length > 0) sb.AppendLine();
+                    if (Items.Count > 1) sb.AppendLine("—— 第 " + idx + " 条 ——");   // 每条都带序号，别让第一条漏标
+                    sb.AppendLine(LogText.Tidy(LogText.Clean(it.Report)));
                 }
                 if (!string.IsNullOrEmpty(StdErr)) sb.AppendLine().AppendLine(StdErr.TrimEnd());
                 return sb.ToString().TrimEnd();
@@ -118,6 +123,9 @@ namespace PromptGacha
         private static readonly Regex SeedRe = new Regex(@"[ \t]*seed=\d+[ \t]*", RegexOptions.Compiled);
         private static readonly Regex EmojiRe = new Regex(@"[\uD83C-\uDBFF][\uDC00-\uDFFF]", RegexOptions.Compiled);
         private static readonly Regex SpacesRe = new Regex(@" {2,}", RegexOptions.Compiled);
+        private static readonly Regex TagCountRe = new Regex(@"（\d+ 个标签）", RegexOptions.Compiled);
+        private static readonly Regex LabelColonRe =
+            new Regex(@"^([^\s:：]{1,10}(?:[ ][^\s:：]{1,10})?)\s*[:：]\s*", RegexOptions.Compiled);
 
         public static string Clean(string log)
         {
@@ -137,6 +145,90 @@ namespace PromptGacha
                 lines[i] = noEmoji.TrimEnd();
             }
             return string.Join("\n", lines);
+        }
+
+        /// <summary>
+        /// 精简引擎日志：只留"一眼有用"的结论。
+        /// 保留：来源角色（抽卡只留特征，这里是唯一能看到抽到谁的地方）、NSFW 等级、
+        /// 服装/姿势/表情/场所、校验结论、真实违规。
+        /// 删掉：热度/特征个数、特征清单（右侧提示词里就是这些标签）、裸露判据、
+        /// 等级目标/实得（界面已选）、双女性识别（来源行已列出几位）、空违规列表、分隔线、池名。
+        /// </summary>
+        public static string Tidy(string log)
+        {
+            if (string.IsNullOrEmpty(log)) return log;
+
+            var kept = new List<string>();
+            foreach (string raw in log.Replace("\r\n", "\n").Split('\n'))
+            {
+                string s = raw.TrimEnd();
+                string t = s.Trim();
+                if (t.Length == 0) { kept.Add(""); continue; }
+
+                // 分隔线
+                if (t.Length >= 4 && (t.Trim('=', '-', '—', '─', '·').Length == 0)) continue;
+
+                // 角色来源 / 热度明细：角色名要留（抽卡本身只留特征，这里是唯一能看到"抽到谁"的地方），
+                // 热度和特征个数没意义，砍掉。
+                int si = t.IndexOf("来源", StringComparison.Ordinal);
+                int hi = t.IndexOf("热度", StringComparison.Ordinal);
+                if (si >= 0 && hi > si)
+                {
+                    string who = t.Substring(si + 2, hi - si - 2).Trim(' ', '·', ':', '：');
+                    if (who.Length == 0) continue;
+                    if (who.Length > 88) who = who.Substring(0, 87).TrimEnd() + "…";
+                    kept.Add("来源：" + who);
+                    continue;
+                }
+                // 特征清单：右侧提示词里全是这些标签
+                if (t.StartsWith("特征 :", StringComparison.Ordinal)) continue;
+                // 「随机女性特征 · 池=… 候选=…」：池和候选数都是界面外的噪声
+                if (t.StartsWith("随机女性特征", StringComparison.Ordinal)) continue;
+                // 裸露判据：内部规则细节
+                if (t.StartsWith("裸露判据", StringComparison.Ordinal)) continue;
+                // 双女性识别：「来源」行已经一位一行列出来了，这里的人数纯属重复
+                if (t.StartsWith("双女性识别", StringComparison.Ordinal)) continue;
+                // 空违规
+                if (t.StartsWith("违规", StringComparison.Ordinal) && t.Contains("[]")) continue;
+                // 「目标等级=1 · 擦边 实得=1 · 擦边」：界面等级已选、校验行也覆盖了，整行不要
+                if (t.Contains("目标等级=") && t.Contains("实得=")) continue;
+
+                s = s.Replace("（角色资料本身中性，不含裸体标签）", "");
+                s = s.Replace("🎲", "").Trim();
+
+                // 「池=热门 TOP200」——界面上已经有池的选择
+                int pi = s.IndexOf("池=", StringComparison.Ordinal);
+                int ci = s.IndexOf("候选=", StringComparison.Ordinal);
+                if (pi >= 0 && ci > pi) s = s.Remove(pi, ci - pi).Trim();
+
+                // 「（6 个标签）」这种计数没有信息量
+                s = TagCountRe.Replace(s, "").Trim();
+
+                // 校验通过：一行说清
+                if (s.StartsWith("✓", StringComparison.Ordinal) && s.Contains("三项校验"))
+                    s = "✓ 三项校验通过";
+
+
+                // 「姿势     : xxx」→「姿势：xxx」
+                s = LabelColonRe.Replace(s, "$1：");
+
+                // 单行不超过 92 字，避免换行后难看
+                if (s.Length > 92) s = s.Substring(0, 91).TrimEnd() + "…";
+                kept.Add(s);
+            }
+
+            // 合并连续空行
+            var sb = new StringBuilder();
+            bool prevBlank = false;
+            foreach (string line in kept)
+            {
+                bool blank = line.Trim().Length == 0;
+                if (blank && prevBlank) continue;
+                if (sb.Length > 0) sb.Append('\n');
+                sb.Append(line);
+                prevBlank = blank;
+            }
+            return sb.ToString().Trim('\n');
         }
     }
 

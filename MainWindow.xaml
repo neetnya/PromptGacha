@@ -557,8 +557,8 @@
                 <GroupBox Grid.Row="3" Header="日志" Padding="0" Margin="0">
                     <TextBox x:Name="TxtLog" IsReadOnly="True" AcceptsReturn="True"
                              Style="{StaticResource ConsoleBox}"
-                             TextWrapping="NoWrap" VerticalScrollBarVisibility="Auto"
-                             HorizontalScrollBarVisibility="Auto" VerticalContentAlignment="Top"
+                             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             HorizontalScrollBarVisibility="Disabled" VerticalContentAlignment="Top"
                              Foreground="{StaticResource InkSoft}" Background="#FBFCFE"
                              FontFamily="Consolas, Microsoft YaHei" FontSize="12" />
                 </GroupBox>

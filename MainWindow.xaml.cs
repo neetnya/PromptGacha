@@ -137,22 +137,58 @@ namespace PromptGacha
             });
         }
 
-        /// <summary>girl + roll：先抽特征拿到声明，再把声明喂给 roll 追加服装等。</summary>
+        /// <summary>
+        /// girl + roll：抽到几组角色就配几套装扮，一组一块日志、一条提示词。
+        /// 逐条往下走 —— 先出「抽到谁」，紧接着出这组的服装/姿势/表情/场所。
+        /// </summary>
         private async void OnGirlRoll(object sender, RoutedEventArgs e)
         {
             var o = CollectOptions();
+            var rollOnce = o.Clone();      // 每组角色只配一条 roll
+            rollOnce.Repeat = 1;
+
             await DrawAsync(async ct =>
             {
-                var g = await ExecAsync("girl", o, null, ct);
+                var g = await ExecAsync("girl", o, null, ct, false);
                 if (g.Failure != null || g.Items.Count == 0) return g;   // 失败原样返回
-                var last = g.Items[g.Items.Count - 1];
-                if (!last.Ok || string.IsNullOrEmpty(last.ClaimJson))
+
+                var merged = new RunOutcome();
+                int total = g.Items.Count;
+
+                for (int i = 0; i < total; i++)
                 {
-                    AppendLog("girl 没有产出可接力的状态，已停止。");
-                    return g;
+                    if (ct.IsCancellationRequested) break;
+
+                    var gi = g.Items[i];
+                    WriteLog(StepTitle(i, total), LogText.Tidy(LogText.Clean(gi.Report)));
+
+                    if (!gi.Ok || string.IsNullOrEmpty(gi.ClaimJson))
+                    {
+                        AppendLines("girl 没有产出可接力的状态，已停止。");
+                        break;
+                    }
+
+                    var r = await ExecAsync("roll", rollOnce, gi.ClaimJson, ct, false);
+                    if (r.Failure != null)
+                    {
+                        AppendLines(r.Failure);
+                        if (merged.Items.Count == 0) return r;
+                        break;
+                    }
+
+                    // 接在同一块里 —— 上面是抽到谁，下面是这组穿什么
+                    AppendLines(r.AllReport);
+                    merged.Items.AddRange(r.Items);
                 }
-                return await ExecAsync("roll", o, last.ClaimJson, ct);
+
+                if (merged.Items.Count == 0) return merged;   // 交给 DrawAsync 统一报「没有拿到结果」
+                return merged;
             });
+        }
+
+        private static string StepTitle(int index, int total)
+        {
+            return total > 1 ? "—— 第 " + (index + 1) + " 条 ——" : null;
         }
 
         /// <summary>清空日志 → 跑一次抽卡流程 → 把结果摊到界面上。</summary>
@@ -219,9 +255,10 @@ namespace PromptGacha
             TxtStatus.Text = "完成 · " + sw.ElapsedMilliseconds + " ms";
         }
 
-        /// <summary>调一次引擎，日志头 + 报告直接落到日志框。</summary>
+        /// <summary>调一次引擎。writeLog=false 时由调用方自己组织日志（girl+roll 逐条配对用）。</summary>
         private async Task<RunOutcome> ExecAsync(string cmd, AnimaOptions o,
-                                                 string claimInJson, CancellationToken ct)
+                                                 string claimInJson, CancellationToken ct,
+                                                 bool writeLog = true)
         {
             string runDir = Path.Combine(Path.GetTempPath(), "PromptGacha");
             Directory.CreateDirectory(runDir);
@@ -239,11 +276,9 @@ namespace PromptGacha
             }
 
             var args = o.ToArgs(cmd, claimInPath, claimOut);
-            AppendLog("—— " + cmd + (claimInPath != null ? "（接上一步的结果）" : "") +
-                      "  level=" + o.Level + "  repeat=" + o.Repeat + " ——");
 
             var outcome = await CliRunner.RunAsync(_pythonExe, _pythonPrefix, _engineDir, args, ct);
-            AppendLog(outcome.Failure ?? outcome.AllReport);
+            if (writeLog) WriteLog(null, outcome.Failure ?? outcome.AllReport);
             return outcome;
         }
 
@@ -298,12 +333,36 @@ namespace PromptGacha
             }
         }
 
+        /// <summary>起一个新日志块：可选标题（—— 第 N 条 ——）+ 若干行正文，块之间空一行。</summary>
+        private void WriteLog(string title, params string[] lines)
+        {
+            var sb = new StringBuilder();
+            if (TxtLog.Text.Length > 0) sb.AppendLine();
+            if (!string.IsNullOrEmpty(title)) sb.AppendLine(title);
+            foreach (string l in lines)
+                if (!string.IsNullOrEmpty(l)) sb.AppendLine(l);
+            if (sb.Length == 0) return;
+            TxtLog.AppendText(sb.ToString());
+            TxtLog.ScrollToEnd();
+        }
+
+        /// <summary>往当前这块日志下面接着写，不加空行、不加标题。</summary>
+        private void AppendLines(params string[] lines)
+        {
+            var sb = new StringBuilder();
+            foreach (string l in lines)
+                if (!string.IsNullOrEmpty(l)) sb.AppendLine(l);
+            if (sb.Length == 0) return;
+            if (TxtLog.Text.Length > 0 && !TxtLog.Text.EndsWith("\n", StringComparison.Ordinal))
+                sb.Insert(0, Environment.NewLine);
+            TxtLog.AppendText(sb.ToString());
+            TxtLog.ScrollToEnd();
+        }
+
         private void AppendLog(string text)
         {
             if (string.IsNullOrEmpty(text)) return;
-            if (TxtLog.Text.Length > 0) TxtLog.AppendText(Environment.NewLine);
-            TxtLog.AppendText(text);
-            TxtLog.ScrollToEnd();
+            AppendLines(text);
         }
 
         private void SetBusy(bool busy)
