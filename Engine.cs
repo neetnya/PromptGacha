@@ -91,7 +91,7 @@ namespace PromptGacha
                 var sb = new StringBuilder();
                 foreach (var it in Items)
                 {
-                    if (sb.Length > 0) sb.AppendLine().AppendLine();   // 多条之间空一行，一眼分得开
+                    if (sb.Length > 0) sb.AppendLine();   // 多条之间只换行，不留空行
                     sb.Append(it.Text);
                 }
                 return sb.ToString();
