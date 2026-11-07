@@ -453,8 +453,6 @@
                     <TextBlock Text="提示词抽卡器" Foreground="{StaticResource Muted}" FontSize="12"
                                VerticalAlignment="Center" Margin="8,2,0,0" />
                 </StackPanel>
-                <TextBlock DockPanel.Dock="Right" Text="girl / roll 引擎" FontSize="11.5"
-                           Foreground="{StaticResource Muted}" VerticalAlignment="Center" />
             </DockPanel>
         </Border>
 
