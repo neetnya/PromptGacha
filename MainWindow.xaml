@@ -623,7 +623,7 @@
                                  Foreground="{StaticResource Ink}" />
                         <TextBlock IsHitTestVisible="False" Margin="16,15,16,0" VerticalAlignment="Top"
                                    TextWrapping="Wrap" FontSize="12.5" Foreground="#AEB7C6"
-                                   Text="抽 girl / 抽 roll 之后，提示词会显示在这里">
+                                   Text="点下面的按钮抽一次，抽中的提示词会显示在这里">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -656,14 +656,15 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="0" x:Name="BtnGirl" Content="抽 girl" Padding="20,7"
-                        MinWidth="104" Click="OnGirl" ToolTip="只抽女性特征" />
-                <Button Grid.Column="1" x:Name="BtnGirlRoll" Content="抽 girl + roll" Padding="20,7"
-                        MinWidth="132" Margin="8,0,0,0" Click="OnGirlRoll"
+                <Button Grid.Column="0" x:Name="BtnGirl" Content="抽角色" Padding="20,7"
+                        MinWidth="98" Click="OnGirl" ToolTip="只抽角色本身，不管穿什么" />
+                <Button Grid.Column="1" x:Name="BtnGirlRoll" Content="角色 + 装扮" Padding="20,7"
+                        MinWidth="122" Margin="8,0,0,0" Click="OnGirlRoll"
                         Style="{StaticResource PrimaryButton}"
-                        ToolTip="先抽特征，再在这套特征上抽服装 / 姿势 / 表情 / 场景" />
-                <Button Grid.Column="2" x:Name="BtnRoll" Content="抽 roll" Padding="20,7"
-                        MinWidth="104" Margin="8,0,0,0" Click="OnRoll" ToolTip="在当前提示词为空时从头抽一套搭配" />
+                        ToolTip="先抽角色，再给每个角色配一套服装 / 姿势 / 表情 / 场景" />
+                <Button Grid.Column="2" x:Name="BtnRoll" Content="抽装扮" Padding="20,7"
+                        MinWidth="98" Margin="8,0,0,0" Click="OnRoll"
+                        ToolTip="只抽装扮；提示词为空时从头抽一套" />
                 <Button Grid.Column="3" x:Name="BtnCancel" Content="取消" Padding="16,7"
                         MinWidth="76" Margin="8,0,0,0" IsEnabled="False" Click="OnCancel" />
 
