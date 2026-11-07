@@ -2,14 +2,18 @@
 
 一键抽出「女性外观特征」和「服装 / 姿势 / 表情 / 场景」，拼成可直接喂给 Anima / SD 系模型的提示词。
 
-由开源项目:[Comfyui-Anima-Wardrobe](https://github.com/lingdongbudong/Comfyui-Anima-Wardrobe)，改造而来
-
 | 抽什么 | 输出示例 |
 |---|---|
 | 女性外观特征（发色 / 瞳色 / 发型 / 体型 / 兽耳等），**只有特征，不含角色名** | `1girl, blue eyes, short hair, white hair, hairband, katana` |
 | 服装 + 姿势 + 表情 + 场景，按等级筛选并经合理性校验 | `underbust, layered black miniskirt, slit throat gesture, in car, sunset` |
 
+由开源项目:[Comfyui-Anima-Wardrobe](https://github.com/lingdongbudong/Comfyui-Anima-Wardrobe)，改造而来
+
 ---
+
+## License
+
+包含的原项目代码遵循 MIT 许可证，版权归 Copyright (c) 2026 lingdongbudong 所有。详见 `LICENSE-original` 文件。
 
 ## 运行
 
