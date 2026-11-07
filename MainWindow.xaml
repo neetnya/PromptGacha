@@ -482,7 +482,7 @@
                             </Grid.ColumnDefinitions>
 
                             <TextBlock Grid.Column="0" Text="等级" Style="{StaticResource FieldLabel}" />
-                            <ComboBox Grid.Column="1" x:Name="CmbLevel" SelectedIndex="1">
+                            <ComboBox Grid.Column="1" x:Name="CmbLevel" SelectedIndex="5">
                                 <ComboBoxItem Content="sfw" />
                                 <ComboBoxItem Content="suggestive" />
                                 <ComboBoxItem Content="explicit" />
