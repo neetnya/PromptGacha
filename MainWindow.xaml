@@ -469,43 +469,50 @@
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <GroupBox Grid.Row="0" Header="通用" Padding="12,11,12,12">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="42" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="46" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <TextBlock Grid.Column="0" Text="等级" Style="{StaticResource FieldLabel}" />
-                        <ComboBox Grid.Column="1" x:Name="CmbLevel" SelectedIndex="1">
-                            <ComboBoxItem Content="sfw" />
-                            <ComboBoxItem Content="suggestive" />
-                            <ComboBoxItem Content="explicit" />
-                            <ComboBoxItem Content="hardcore" />
-                            <ComboBoxItem Content="extreme" />
-                            <ComboBoxItem Content="any" />
-                        </ComboBox>
-
-                        <TextBlock Grid.Column="2" Text="连抽" Style="{StaticResource FieldLabel}" Margin="10,0,6,0" />
-                        <TextBox Grid.Column="3" x:Name="TxtRepeat" Text="1" />
-                    </Grid>
-                </GroupBox>
-
-                <GroupBox Grid.Row="1" Header="girl —— 女性特征" Padding="12,11,12,12">
+                <GroupBox Grid.Row="0" Header="抽卡设置" Padding="12,10,12,10">
                     <StackPanel>
+                        <!-- 通用 -->
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="42" />
+                                <ColumnDefinition Width="38" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="46" />
+                                <ColumnDefinition Width="56" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Grid.Column="0" Text="等级" Style="{StaticResource FieldLabel}" />
+                            <ComboBox Grid.Column="1" x:Name="CmbLevel" SelectedIndex="1">
+                                <ComboBoxItem Content="sfw" />
+                                <ComboBoxItem Content="suggestive" />
+                                <ComboBoxItem Content="explicit" />
+                                <ComboBoxItem Content="hardcore" />
+                                <ComboBoxItem Content="extreme" />
+                                <ComboBoxItem Content="any" />
+                            </ComboBox>
+
+                            <TextBlock Grid.Column="2" Text="连抽" Style="{StaticResource FieldLabel}" Margin="10,0,6,0" />
+                            <TextBox Grid.Column="3" x:Name="TxtRepeat" Text="1" />
+                        </Grid>
+
+                        <!-- 角色分组 -->
+                        <Grid Margin="0,9,0,6">
+                            <Border Height="1" Background="{StaticResource LineSoft}" VerticalAlignment="Center" />
+                            <Border Background="{StaticResource Card}" Padding="0,0,9,0"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <TextBlock Text="角色 · 女性特征" FontSize="11.5"
+                                           Foreground="{StaticResource Muted}" />
+                            </Border>
+                        </Grid>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="38" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="44" />
+                                <ColumnDefinition Width="62" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto" />
@@ -519,7 +526,7 @@
                                 <ComboBoxItem Content="全部女性" />
                             </ComboBox>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="关系" Style="{StaticResource FieldLabel}" Margin="0,4,6,0" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="关系" Style="{StaticResource FieldLabel}" Margin="0,3,6,0" />
                             <ComboBox Grid.Row="1" Grid.Column="1" x:Name="CmbRelation" SelectedIndex="0">
                                 <ComboBoxItem Content="auto（按等级）" Tag="auto" />
                                 <ComboBoxItem Content="normal（正常互动）" Tag="normal" />
@@ -527,7 +534,7 @@
                                 <ComboBoxItem Content="none（不加）" Tag="none" />
                             </ComboBox>
 
-                            <TextBlock Grid.Row="1" Grid.Column="2" Text="人数" Style="{StaticResource FieldLabel}" Margin="10,4,6,0" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="人数" Style="{StaticResource FieldLabel}" Margin="10,3,6,0" />
                             <ComboBox Grid.Row="1" Grid.Column="3" x:Name="CmbCount" SelectedIndex="0">
                                 <ComboBoxItem Content="1" />
                                 <ComboBoxItem Content="2" />
@@ -535,26 +542,32 @@
                             </ComboBox>
                         </Grid>
 
-                        <Border Height="1" Background="{StaticResource LineSoft}" Margin="0,10,0,9" />
+                        <WrapPanel Margin="0,7,0,0">
+                            <CheckBox x:Name="ChkHuge" Content="强制巨乳" Margin="0,0,16,0" />
+                            <CheckBox x:Name="ChkNoAvoid" Content="关闭避重" Margin="0,0,16,0" />
+                        </WrapPanel>
+
+                        <!-- 装扮分组 -->
+                        <Grid Margin="0,9,0,6">
+                            <Border Height="1" Background="{StaticResource LineSoft}" VerticalAlignment="Center" />
+                            <Border Background="{StaticResource Card}" Padding="0,0,9,0"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <TextBlock Text="装扮 · 服装 / 姿势 / 表情 / 场景" FontSize="11.5"
+                                           Foreground="{StaticResource Muted}" />
+                            </Border>
+                        </Grid>
 
                         <WrapPanel>
-                            <CheckBox x:Name="ChkHuge" Content="强制巨乳" Margin="0,0,16,2" />
-                            <CheckBox x:Name="ChkNoAvoid" Content="关闭避重" Margin="0,0,16,2" />
+                            <CheckBox x:Name="ChkNoOutfit" Content="不抽服装" Margin="0,0,16,3" />
+                            <CheckBox x:Name="ChkNoPose" Content="不抽姿势" Margin="0,0,16,3" />
+                            <CheckBox x:Name="ChkNoExpr" Content="不抽表情" Margin="0,0,16,3" />
+                            <CheckBox x:Name="ChkNoScene" Content="不抽场景" Margin="0,0,16,3" />
+                            <CheckBox x:Name="ChkAllowPublic" Content="允许公共场合暴露" Margin="0,0,16,3" />
                         </WrapPanel>
                     </StackPanel>
                 </GroupBox>
 
-                <GroupBox Grid.Row="2" Header="roll —— 服装 / 姿势 / 表情 / 场景" Padding="12,11,12,9">
-                    <WrapPanel>
-                        <CheckBox x:Name="ChkNoOutfit" Content="不抽服装" Margin="0,0,16,4" />
-                        <CheckBox x:Name="ChkNoPose" Content="不抽姿势" Margin="0,0,16,4" />
-                        <CheckBox x:Name="ChkNoExpr" Content="不抽表情" Margin="0,0,16,4" />
-                        <CheckBox x:Name="ChkNoScene" Content="不抽场景" Margin="0,0,16,4" />
-                        <CheckBox x:Name="ChkAllowPublic" Content="允许公共场合暴露" Margin="0,0,16,4" />
-                    </WrapPanel>
-                </GroupBox>
-
-                <GroupBox Grid.Row="3" Header="日志" Padding="0" Margin="0">
+                <GroupBox Grid.Row="1" Header="日志" Padding="0" Margin="0">
                     <TextBox x:Name="TxtLog" IsReadOnly="True" AcceptsReturn="True"
                              Style="{StaticResource ConsoleBox}"
                              TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
